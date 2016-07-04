@@ -39,41 +39,58 @@ def createSketch(component, planarEntity, name):
     return sketch
 
 
-def run(context):
-    newComp = createComponent( "Box" )
-    
-    # construction plane
-    #xyPlane = newComp.xYConstructionPlane
-    xzPlane = newComp.xZConstructionPlane
-    
-    topPlane = createOffsetPlane( newComp, xzPlane, 5.0, "Top wall" )
-    
-    sketch = createSketch( newComp, topPlane, "Top wall" )
-    
-    # draw lines
-    center = adsk.core.Point3D.create(0, 0, 0)
-    p1 = adsk.core.Point3D.create(center.x + 10, center.y)
-    p2 = adsk.core.Point3D.create(center.x + 10, center.y - 10)
-    p3 = adsk.core.Point3D.create(center.x, center.y - 10)
-    
-    sketch.sketchCurves.sketchLines.addByTwoPoints(center, p1)
-    sketch.sketchCurves.sketchLines.addByTwoPoints(p1, p2)
-    sketch.sketchCurves.sketchLines.addByTwoPoints(p2, p3)
-    sketch.sketchCurves.sketchLines.addByTwoPoints(p3, center)
-    
-    # extrude
-    extrudes = newComp.features.extrudeFeatures
-    prof = sketch.profiles[0]
-    extInput = extrudes.createInput(prof, adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
-    distance = adsk.core.ValueInput.createByReal(0.4)
+def extrudeSketch(component, sketch, depth, name):
+    extrudes = component.features.extrudeFeatures
+    extInput = extrudes.createInput( sketch.profiles[0], adsk.fusion.FeatureOperations.NewBodyFeatureOperation)
+    distance = adsk.core.ValueInput.createByReal( depth )
     extInput.setDistanceExtent(False, distance)
     headExt = extrudes.add(extInput)
+    headExt.faces[0].body.name = name
+
+
+def createWall(component, plane, width, height, offset, thickness, name):
+    center = adsk.core.Point3D.create(0, 0, 0)
     
-    # give body name
-    fc = headExt.faces[0]
-    bd = fc.body
-    bd.name = "Top wall"
-        
+    topPlane = createOffsetPlane( component, plane, offset, name )
+    sketch = createSketch( component, topPlane, name )
+    
+    c1 = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
+    c2 = adsk.core.Point3D.create(center.x + (width/2), center.y + (height/2))
+    c3 = adsk.core.Point3D.create(center.x + (width/2), center.y - (height/2))
+    c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
+    
+    sketch.sketchCurves.sketchLines.addByTwoPoints(c1, c2)
+    sketch.sketchCurves.sketchLines.addByTwoPoints(c2, c3)
+    sketch.sketchCurves.sketchLines.addByTwoPoints(c3, c4)
+    sketch.sketchCurves.sketchLines.addByTwoPoints(c4, c1)
+    
+    extrudeSketch( component, sketch, thickness, name )
+
+
+def run(context):
+    boxWidth = 20
+    boxHeight = 20
+    boxDepth = 20
+    wallThickness = 0.5
+    
+    
+    
+    newComp = createComponent( "Box" )
+    xyPlane = newComp.xYConstructionPlane
+    yzPlane = newComp.yZConstructionPlane
+    xzPlane = newComp.xZConstructionPlane
+    
+    
+    
+    createWall(newComp, xyPlane, boxWidth, boxHeight, boxDepth/2, wallThickness, "Front wall")
+    createWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2), -wallThickness, "Back wall")
+    
+    createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), (boxWidth/2)-wallThickness, wallThickness, "Right wall")
+    createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), -(boxWidth/2), wallThickness, "Left wall")
+    
+    createWall(newComp, xzPlane, boxWidth, boxDepth, (boxHeight/2)-wallThickness, wallThickness, "Top wall")
+    createWall(newComp, xzPlane, boxWidth, boxDepth, -(boxHeight/2), wallThickness, "Bottom wall")
+
         
         
         
