@@ -5,7 +5,16 @@ import adsk.core, adsk.fusion, adsk.cam, traceback
 
 
 
-
+def deleteAllComponents():
+    app = adsk.core.Application.get()
+    product = app.activeProduct
+    design = adsk.fusion.Design.cast(product)   
+    
+    for comp in design.allComponents:
+        for occ in comp.allOccurrences:
+            print("Deleting " + occ.name + " in " + comp.name)
+            occ.deleteMe()
+            
 
 def createComponent( name ):
     app = adsk.core.Application.get()
@@ -68,11 +77,13 @@ def createWall(component, plane, width, height, offset, thickness, name):
 
 
 def run(context):
-    boxWidth = 20
-    boxHeight = 20
-    boxDepth = 20
-    wallThickness = 0.5
+    boxWidth = 10
+    boxHeight = 5
+    boxDepth = 5
+    wallThickness = 0.4
     
+    
+    deleteAllComponents()
     
     
     newComp = createComponent( "Box" )
@@ -81,19 +92,18 @@ def run(context):
     xzPlane = newComp.xZConstructionPlane
     
     
-    
     createWall(newComp, xyPlane, boxWidth, boxHeight, boxDepth/2, wallThickness, "Front wall")
     createWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2), -wallThickness, "Back wall")
     
     createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), (boxWidth/2)-wallThickness, wallThickness, "Right wall")
-    createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), -(boxWidth/2), wallThickness, "Left wall")
+    createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), -(boxWidth/2)+wallThickness, -wallThickness, "Left wall")
     
     createWall(newComp, xzPlane, boxWidth, boxDepth, (boxHeight/2)-wallThickness, wallThickness, "Top wall")
-    createWall(newComp, xzPlane, boxWidth, boxDepth, -(boxHeight/2), wallThickness, "Bottom wall")
-
-        
-        
-        
-        
-        
-        
+    createWall(newComp, xzPlane, boxWidth, boxDepth, -(boxHeight/2)+wallThickness, -wallThickness, "Bottom wall")
+    
+    
+    
+    
+    
+    
+    
