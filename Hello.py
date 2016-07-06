@@ -1,7 +1,7 @@
 #Author-
 #Description-
 
-import adsk.core, adsk.fusion, adsk.cam, traceback
+import adsk.core, adsk.fusion, adsk.cam
 
 
 
@@ -76,6 +76,108 @@ def createWall(component, plane, width, height, offset, thickness, name):
     extrudeSketch( component, sketch, thickness, name )
 
 
+def createFingerJointsWall(component, plane, width, height, offset, thickness, name):
+    center = adsk.core.Point3D.create(0, 0, 0)
+    
+    topPlane = createOffsetPlane( component, plane, offset, name )
+    sketch = createSketch( component, topPlane, name )
+    
+    c1 = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
+    c2 = adsk.core.Point3D.create(center.x + (width/2), center.y + (height/2))
+    c3 = adsk.core.Point3D.create(center.x + (width/2), center.y - (height/2))
+    c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
+    
+    
+    tabWidth = 2
+    startPoint = adsk.core.Point3D.create(c1.x, c1.y-thickness)
+    # Top tabs
+    last = createHorizontalTab(sketch, startPoint, tabWidth, thickness)
+    last = createHorizontalLine(sketch, last, tabWidth)
+    last = createHorizontalTab(sketch, last, tabWidth, thickness)
+    last = createHorizontalLine(sketch, last, tabWidth)
+    last = createHorizontalTab(sketch, last, tabWidth, thickness)
+    
+    
+    # Bottom tabs
+    last = createHorizontalLine(sketch, c4, tabWidth)
+    last = createHorizontalTab(sketch, last, tabWidth, thickness)
+    last = createHorizontalLine(sketch, last, tabWidth)
+    last = createHorizontalTab(sketch, last, tabWidth, thickness)
+    last = createHorizontalLine(sketch, last, tabWidth)
+    
+    
+    tabWidth = 1
+    # Left tabs
+    last = createVerticalLine(sketch, c1, tabWidth)
+    last = createVerticalTab(sketch, last, tabWidth, thickness)
+    last = createVerticalLine(sketch, last, tabWidth)
+    last = createVerticalTab(sketch, last, tabWidth, thickness)
+    last = createVerticalLine(sketch, last, tabWidth)
+    
+    
+    startPoint = adsk.core.Point3D.create(c2.x-thickness, c2.y)
+    # Right tabs
+    last = createVerticalTab(sketch, startPoint, tabWidth, thickness)
+    last = createVerticalLine(sketch, last, tabWidth)
+    last = createVerticalTab(sketch, last, tabWidth, thickness)
+    last = createVerticalLine(sketch, last, tabWidth)
+    last = createVerticalTab(sketch, last, tabWidth, thickness)
+    
+    
+    
+    
+    #sketch.sketchCurves.sketchLines.addByTwoPoints(c1, c2)
+    #sketch.sketchCurves.sketchLines.addByTwoPoints(c2, c3)
+    #sketch.sketchCurves.sketchLines.addByTwoPoints(c3, c4)
+    #sketch.sketchCurves.sketchLines.addByTwoPoints(c4, c1)
+    
+    #extrudeSketch( component, sketch, thickness, name )
+
+
+def createHorizontalTab(sketch, startPoint, tabWidth, tabHeight):
+    p1 = adsk.core.Point3D.create(startPoint.x, startPoint.y)
+    p2 = adsk.core.Point3D.create(p1.x, p1.y+tabHeight)
+    p3 = adsk.core.Point3D.create(p2.x+tabWidth, p2.y)
+    p4 = adsk.core.Point3D.create(p3.x, p3.y-tabHeight)
+    
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p1, p2)
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p2, p3)
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p3, p4)
+    
+    return p4
+
+
+def createVerticalTab(sketch, startPoint, tabWidth, tabHeight):
+    p1 = adsk.core.Point3D.create(startPoint.x, startPoint.y)
+    p2 = adsk.core.Point3D.create(p1.x+tabHeight, p1.y)
+    p3 = adsk.core.Point3D.create(p2.x, p2.y-tabWidth)
+    p4 = adsk.core.Point3D.create(p3.x-tabHeight, p3.y)
+    
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p1, p2)
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p2, p3)
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p3, p4)
+    
+    return p4
+
+
+def createHorizontalLine(sketch, startPoint, tabWidth):
+    p1 = adsk.core.Point3D.create(startPoint.x, startPoint.y)
+    p2 = adsk.core.Point3D.create(p1.x+tabWidth, p1.y)
+    
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p1, p2)
+    
+    return p2
+
+
+def createVerticalLine(sketch, startPoint, tabWidth):
+    p1 = adsk.core.Point3D.create(startPoint.x, startPoint.y)
+    p2 = adsk.core.Point3D.create(p1.x, p1.y-tabWidth)
+    
+    sketch.sketchCurves.sketchLines.addByTwoPoints(p1, p2)
+    
+    return p2
+
+
 def run(context):
     boxWidth = 10
     boxHeight = 5
@@ -92,14 +194,17 @@ def run(context):
     xzPlane = newComp.xZConstructionPlane
     
     
-    createWall(newComp, xyPlane, boxWidth, boxHeight, boxDepth/2, wallThickness, "Front wall")
-    createWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2), -wallThickness, "Back wall")
     
-    createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), (boxWidth/2)-wallThickness, wallThickness, "Right wall")
-    createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), -(boxWidth/2)+wallThickness, -wallThickness, "Left wall")
+    createFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, boxDepth/2, wallThickness, "Front wall")
     
-    createWall(newComp, xzPlane, boxWidth, boxDepth, (boxHeight/2)-wallThickness, wallThickness, "Top wall")
-    createWall(newComp, xzPlane, boxWidth, boxDepth, -(boxHeight/2)+wallThickness, -wallThickness, "Bottom wall")
+    #createWall(newComp, xyPlane, boxWidth, boxHeight, boxDepth/2, wallThickness, "Front wall")
+    #createWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2), -wallThickness, "Back wall")
+    
+    #createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), (boxWidth/2)-wallThickness, wallThickness, "Right wall")
+    #createWall(newComp, yzPlane, boxDepth, boxHeight-(wallThickness*2), -(boxWidth/2)+wallThickness, -wallThickness, "Left wall")
+    
+    #createWall(newComp, xzPlane, boxWidth, boxDepth, (boxHeight/2)-wallThickness, wallThickness, "Top wall")
+    #createWall(newComp, xzPlane, boxWidth, boxDepth, -(boxHeight/2)+wallThickness, -wallThickness, "Bottom wall")
     
     
     
