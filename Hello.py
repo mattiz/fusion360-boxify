@@ -87,52 +87,69 @@ def createFingerJointsWall(component, plane, width, height, offset, thickness, n
     c3 = adsk.core.Point3D.create(center.x + (width/2), center.y - (height/2))
     c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
     
-    
     tabWidth = 2
     startPoint = adsk.core.Point3D.create(c1.x, c1.y-thickness)
-    # Top tabs
-    last = createHorizontalTab(sketch, startPoint, tabWidth, thickness, includeFirst = False)
-    last = createHorizontalLine(sketch, last, tabWidth)
-    last = createHorizontalTab(sketch, last, tabWidth, thickness)
-    last = createHorizontalLine(sketch, last, tabWidth)
-    last = createHorizontalTab(sketch, last, tabWidth, thickness, includeLast = False)
+    createTopTabbedLine(sketch, startPoint, tabWidth, thickness)
     
-    
-    # Bottom tabs
-    last = createHorizontalLine(sketch, c4, tabWidth)
-    last = createHorizontalTab(sketch, last, tabWidth, thickness)
-    last = createHorizontalLine(sketch, last, tabWidth)
-    last = createHorizontalTab(sketch, last, tabWidth, thickness)
-    last = createHorizontalLine(sketch, last, tabWidth)
-    
-    
+    createBottomTabbedLine(sketch, c4, tabWidth, thickness)
+
     tabWidth = 1
-    # Left tabs
-    last = createVerticalLine(sketch, c1, tabWidth)
-    last = createVerticalTab(sketch, last, tabWidth, thickness)
-    last = createVerticalLine(sketch, last, tabWidth)
-    last = createVerticalTab(sketch, last, tabWidth, thickness)
-    last = createVerticalLine(sketch, last, tabWidth)
-    
+    createLeftTabbedLine(sketch, c1, tabWidth, thickness)
     
     startPoint = adsk.core.Point3D.create(c2.x-thickness, c2.y)
-    # Right tabs
-    last = createVerticalTab(sketch, startPoint, tabWidth, thickness, includeFirst = False)
-    last = createVerticalLine(sketch, last, tabWidth)
-    last = createVerticalTab(sketch, last, tabWidth, thickness)
-    last = createVerticalLine(sketch, last, tabWidth)
-    last = createVerticalTab(sketch, last, tabWidth, thickness, includeLast = False)
-    
-    
-    
-    
-    #sketch.sketchCurves.sketchLines.addByTwoPoints(c1, c2)
-    #sketch.sketchCurves.sketchLines.addByTwoPoints(c2, c3)
-    #sketch.sketchCurves.sketchLines.addByTwoPoints(c3, c4)
-    #sketch.sketchCurves.sketchLines.addByTwoPoints(c4, c1)
+    createRightTabbedLine(sketch, startPoint, tabWidth, thickness)
+
     
     #extrudeSketch( component, sketch, thickness, name )
 
+
+def createTopTabbedLine(sketch, startPoint, tabWidth, thickness):
+    last = createHorizontalTab(sketch, startPoint, tabWidth, thickness, includeFirst = False)
+    
+    for i in range(3):
+        if i % 2:
+            last = createHorizontalTab(sketch, last, tabWidth, thickness)
+        else:
+            last = createHorizontalLine(sketch, last, tabWidth)
+    
+    last = createHorizontalTab(sketch, last, tabWidth, thickness, includeLast = False)
+
+
+def createBottomTabbedLine(sketch, startPoint, tabWidth, thickness):
+    last = createHorizontalLine(sketch, startPoint, tabWidth)
+    
+    for i in range(3):
+        if i % 2:
+            last = createHorizontalLine(sketch, last, tabWidth)
+        else:
+            last = createHorizontalTab(sketch, last, tabWidth, thickness)
+    
+    last = createHorizontalLine(sketch, last, tabWidth)
+
+
+def createLeftTabbedLine(sketch, startPoint, tabWidth, thickness):
+    last = createVerticalLine(sketch, startPoint, tabWidth)
+    
+    for i in range(3):
+        if i % 2:
+            last = createVerticalLine(sketch, last, tabWidth)
+        else:
+            last = createVerticalTab(sketch, last, tabWidth, thickness)
+    
+    last = createVerticalLine(sketch, last, tabWidth)
+
+
+def createRightTabbedLine(sketch, startPoint, tabWidth, thickness):
+    last = createVerticalTab(sketch, startPoint, tabWidth, thickness, includeFirst = False)
+    
+    for i in range(3):
+        if i % 2:
+            last = createVerticalTab(sketch, last, tabWidth, thickness)
+        else:
+            last = createVerticalLine(sketch, last, tabWidth)
+    
+    last = createVerticalTab(sketch, last, tabWidth, thickness, includeLast = False)
+    
 
 def createHorizontalTab(sketch, startPoint, tabWidth, tabHeight, includeFirst = True, includeLast = True):
     p1 = adsk.core.Point3D.create(startPoint.x, startPoint.y)
