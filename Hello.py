@@ -87,20 +87,67 @@ def createFingerJointsWall(component, plane, width, height, offset, thickness, n
     c3 = adsk.core.Point3D.create(center.x + (width/2), center.y - (height/2))
     c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
     
-    tabWidth = 2
-    startPoint = adsk.core.Point3D.create(c1.x, c1.y-thickness)
-    createTopTabbedLine(sketch, startPoint, tabWidth, thickness)
+    #startPoint = adsk.core.Point3D.create(c1.x, c1.y-thickness)
+    #createTopTabbedLine(sketch, startPoint, tabWidth, thickness)
+    #createBottomTabbedLine(sketch, c4, tabWidth, thickness)
+    #createLeftTabbedLine(sketch, c1, tabWidth, thickness)
+    #startPoint = adsk.core.Point3D.create(c2.x-thickness, c2.y)
+    #createRightTabbedLine(sketch, startPoint, tabWidth, thickness)
     
-    createBottomTabbedLine(sketch, c4, tabWidth, thickness)
-
-    tabWidth = 1
-    createLeftTabbedLine(sketch, c1, tabWidth, thickness)
     
-    startPoint = adsk.core.Point3D.create(c2.x-thickness, c2.y)
-    createRightTabbedLine(sketch, startPoint, tabWidth, thickness)
-
+    # Top
+    squarePattern( sketch, c1, 2, 0.4, 9, [RIGHT, DOWN, RIGHT, UP] )
+    
+    # Bottom
+    squarePattern( sketch, c4, 2, 0.4, 9, [RIGHT, UP, RIGHT, DOWN] )
+    
+    # Left
+    squarePattern( sketch, c1, 0.4, 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
+    
+    # Right
+    squarePattern( sketch, c2, 0.4, 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
+    
+    
     
     #extrudeSketch( component, sketch, thickness, name )
+
+UP = 1
+DOWN = 2
+RIGHT = 3
+LEFT = 4
+
+
+def squarePattern(sketch, startPoint, width, height, number, pattern):
+    points = []
+    index = 0
+    last = startPoint
+    points.append( startPoint )
+    
+    for i in range(number):
+        if index > len(pattern)-1:
+            index = 0
+        
+        p = pattern[index]
+        index += 1
+        
+        if p == UP:
+            last = adsk.core.Point3D.create( last.x, last.y+height )
+            points.append( last )
+        
+        if p == DOWN:
+            last = adsk.core.Point3D.create( last.x, last.y-height )
+            points.append( last )
+        
+        if p == RIGHT:
+            last = adsk.core.Point3D.create( last.x+width, last.y )
+            points.append( last )
+        
+        if p == LEFT:
+            last = adsk.core.Point3D.create( last.x-width, last.y )
+            points.append( last )
+    
+    for i in range(0, len(points)-1):
+        sketch.sketchCurves.sketchLines.addByTwoPoints( points[i], points[i+1] )
 
 
 def createTopTabbedLine(sketch, startPoint, tabWidth, thickness):
@@ -219,8 +266,8 @@ def run(context):
     xzPlane = newComp.xZConstructionPlane
     
     
-    
     createFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, boxDepth/2, wallThickness, "Front wall")
+    
     
     #createWall(newComp, xyPlane, boxWidth, boxHeight, boxDepth/2, wallThickness, "Front wall")
     #createWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2), -wallThickness, "Back wall")
