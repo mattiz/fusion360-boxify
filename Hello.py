@@ -93,16 +93,16 @@ def createFrontAndBackFingerJointsWall(component, plane, width, height, offset, 
     c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
     
     # Top
-    squarePattern( sketch, c1, 1, 0.4, 19, [RIGHT, DOWN, RIGHT, UP] )
+    squarePattern( sketch, c1, 1, abs(thickness), 19, [RIGHT, DOWN, RIGHT, UP] )
     
     # Bottom
-    squarePattern( sketch, c4, 1, 0.4, 19, [RIGHT, UP, RIGHT, DOWN] )
+    squarePattern( sketch, c4, 1, abs(thickness), 19, [RIGHT, UP, RIGHT, DOWN] )
     
     # Left
-    squarePattern( sketch, c1, 0.4, 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
+    squarePattern( sketch, c1, abs(thickness), 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
     
     # Right
-    squarePattern( sketch, c2, 0.4, 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
+    squarePattern( sketch, c2, abs(thickness), 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
     
     extrudeSketch( component, sketch, thickness, name )
 
@@ -119,16 +119,16 @@ def createLeftAndRightFingerJointsWall(component, plane, width, height, offset, 
     c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
     
     # Top
-    squarePattern( sketch, c1, 1.24, 0.4, 9, [RIGHT, DOWN, RIGHT, UP] )
+    squarePattern( sketch, c1, 1.24, abs(thickness), 9, [RIGHT, DOWN, RIGHT, UP] )
     
     # Bottom
-    squarePattern( sketch, c4, 1.24, 0.4, 9, [RIGHT, UP, RIGHT, DOWN] )
+    squarePattern( sketch, c4, 1.24, abs(thickness), 9, [RIGHT, UP, RIGHT, DOWN] )
     
     # Left
-    squarePattern( sketch, c1, 0.4, 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
+    squarePattern( sketch, c1, abs(thickness), 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
     
     # Right
-    squarePattern( sketch, c2, 0.4, 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
+    squarePattern( sketch, c2, abs(thickness), 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
     
     extrudeSketch( component, sketch, thickness, name )
 
@@ -146,16 +146,16 @@ def createTopAndBottomFingerJointsWall(component, plane, width, height, offset, 
     
     # Top
     startPoint = adsk.core.Point3D.create(c1.x+thickness, c1.y-thickness)
-    last = squarePattern( sketch, startPoint, 1, 0.4, 17, [RIGHT, UP, RIGHT, DOWN], 0.6 )
+    last = squarePattern( sketch, startPoint, 1, abs(thickness), 17, [RIGHT, UP, RIGHT, DOWN], 0.6 )
     
     # Right
-    last = squarePattern( sketch, last, 0.4, 1.24, 9, [DOWN, RIGHT, DOWN, LEFT] )
+    last = squarePattern( sketch, last, abs(thickness), 1.24, 9, [DOWN, RIGHT, DOWN, LEFT] )
     
     # Bottom
-    last = squarePattern( sketch, last, 1, 0.4, 17, [LEFT, DOWN, LEFT, UP], 0.6 )
+    last = squarePattern( sketch, last, 1, abs(thickness), 17, [LEFT, DOWN, LEFT, UP], 0.6 )
     
     # Left
-    squarePattern( sketch, last, 0.4, 1.24, 9, [UP, LEFT, UP, RIGHT] )
+    squarePattern( sketch, last, abs(thickness), 1.24, 9, [UP, LEFT, UP, RIGHT] )
     
     
     
