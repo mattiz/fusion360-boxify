@@ -93,16 +93,16 @@ def createFrontAndBackFingerJointsWall(component, plane, width, height, offset, 
     c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
     
     # Top
-    squarePattern( sketch, c1, 1, abs(thickness), 19, [RIGHT, DOWN, RIGHT, UP] )
-    
-    # Bottom
-    squarePattern( sketch, c4, 1, abs(thickness), 19, [RIGHT, UP, RIGHT, DOWN] )
-    
-    # Left
-    squarePattern( sketch, c1, abs(thickness), 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
+    last = squarePattern( sketch, c1, 1, abs(thickness), 17, [RIGHT, DOWN, RIGHT, UP] )
     
     # Right
-    squarePattern( sketch, c2, abs(thickness), 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
+    last = squarePattern( sketch, last, abs(thickness), 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
+    
+    # Bottom
+    last = squarePattern( sketch, last, 1, abs(thickness), 17, [LEFT, UP, LEFT, DOWN] )
+    
+    # Left
+    squarePattern( sketch, last, abs(thickness), 1, 9, [UP, RIGHT, UP, LEFT] )
     
     extrudeSketch( component, sketch, thickness, name )
 
