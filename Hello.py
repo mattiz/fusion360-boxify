@@ -87,13 +87,10 @@ def createFrontAndBackFingerJointsWall(component, plane, width, height, offset, 
     topPlane = createOffsetPlane( component, plane, offset, name )
     sketch = createSketch( component, topPlane, name )
     
-    c1 = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
-    c2 = adsk.core.Point3D.create(center.x + (width/2), center.y + (height/2))
-    c3 = adsk.core.Point3D.create(center.x + (width/2), center.y - (height/2))
-    c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
+    startPoint = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
     
     # Top
-    last = squarePattern( sketch, c1, 1, abs(thickness), 17, [RIGHT, DOWN, RIGHT, UP] )
+    last = squarePattern( sketch, startPoint, 1, abs(thickness), 17, [RIGHT, DOWN, RIGHT, UP] )
     
     # Right
     last = squarePattern( sketch, last, abs(thickness), 1, 9, [DOWN, LEFT, DOWN, RIGHT] )
@@ -113,13 +110,10 @@ def createLeftAndRightFingerJointsWall(component, plane, width, height, offset, 
     topPlane = createOffsetPlane( component, plane, offset, name )
     sketch = createSketch( component, topPlane, name )
     
-    c1 = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
-    c2 = adsk.core.Point3D.create(center.x + (width/2), center.y + (height/2))
-    c3 = adsk.core.Point3D.create(center.x + (width/2), center.y - (height/2))
-    c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
+    startPoint = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
     
     # Top
-    last = squarePattern( sketch, c1, 1.24, abs(thickness), 9, [RIGHT, DOWN, RIGHT, UP] )
+    last = squarePattern( sketch, startPoint, 1.24, abs(thickness), 9, [RIGHT, DOWN, RIGHT, UP] )
     
     # Right
     last = squarePattern( sketch, last, abs(thickness), 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
@@ -139,13 +133,9 @@ def createTopAndBottomFingerJointsWall(component, plane, width, height, offset, 
     topPlane = createOffsetPlane( component, plane, offset, name )
     sketch = createSketch( component, topPlane, name )
     
-    c1 = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
-    c2 = adsk.core.Point3D.create(center.x + (width/2), center.y + (height/2))
-    c3 = adsk.core.Point3D.create(center.x + (width/2), center.y - (height/2))
-    c4 = adsk.core.Point3D.create(center.x - (width/2), center.y - (height/2))
+    startPoint = adsk.core.Point3D.create(center.x - (width/2) + thickness, center.y + (height/2) - thickness)
     
     # Top
-    startPoint = adsk.core.Point3D.create(c1.x+thickness, c1.y-thickness)
     last = squarePattern( sketch, startPoint, 1, abs(thickness), 17, [RIGHT, UP, RIGHT, DOWN], 0.6 )
     
     # Right
@@ -156,8 +146,6 @@ def createTopAndBottomFingerJointsWall(component, plane, width, height, offset, 
     
     # Left
     squarePattern( sketch, last, abs(thickness), 1.24, 9, [UP, LEFT, UP, RIGHT] )
-    
-    
     
     extrudeSketch( component, sketch, thickness, name )
 
