@@ -133,7 +133,8 @@ def createTopAndBottomFingerJointsWall(component, plane, width, height, offset, 
     topPlane = createOffsetPlane( component, plane, offset, name )
     sketch = createSketch( component, topPlane, name )
     
-    startPoint = adsk.core.Point3D.create(center.x - (width/2) + thickness, center.y + (height/2) - thickness)
+    #startPoint = adsk.core.Point3D.create(center.x - (width/2) + thickness, center.y + (height/2) - thickness)
+    startPoint = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
     
     # Top
     last = squarePattern( sketch, startPoint, 1, abs(thickness), 17, [RIGHT, UP, RIGHT, DOWN], 0.6 )
@@ -206,14 +207,17 @@ def run(context):
     xzPlane = newComp.xZConstructionPlane
     
     
+    # width = 9, height = 5
     createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, (boxDepth/2)-wallThickness, wallThickness, "Front wall")
     createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2)+wallThickness, -wallThickness, "Back wall")
     
+    # width = 6.2, height = 5
     createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, (boxWidth/2)-wallThickness, wallThickness, "Right wall")
     createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, -(boxWidth/2)+wallThickness, -wallThickness, "Left wall")
     
-    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth, boxDepth, (boxHeight/2)-wallThickness, wallThickness, "Top wall")   
-    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*4), boxDepth-(wallThickness*4), -(boxHeight/2)+wallThickness, -wallThickness, "Bottom wall")
+    # width = 8.2, height = 6.2
+    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), (boxHeight/2)-wallThickness, wallThickness, "Top wall")   
+    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), -(boxHeight/2)+wallThickness, -wallThickness, "Bottom wall")    
     
     
     
