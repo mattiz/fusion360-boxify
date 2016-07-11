@@ -101,7 +101,7 @@ def createWall(component, plane, width, height, offset, thickness, name):
 def calculateTabLength( wantedTabLength, wallLength ):
     numTabs = wallLength / wantedTabLength
     numTabs = roundToNearestEOdd(numTabs)
-    return numTabs, wallLength / numTabs
+    return numTabs, (wallLength / numTabs)
 
 
 def calculateNumEdges( numTabs ):
@@ -120,13 +120,13 @@ def createFrontAndBackFingerJointsWall(component, plane, width, height, offset, 
     
     numHorizontalTabs, horizontalTabWidth = calculateTabLength( wantedTabLength, width )
     numHorizontalEdges = calculateNumEdges( numHorizontalTabs )
-    print( "Horizontal tab width: ", horizontalTabWidth )
-    print( "Num horizontal edges: ", numHorizontalEdges )
+    #print( "Horizontal tab width: ", horizontalTabWidth )
+    #print( "Num horizontal edges: ", numHorizontalEdges )
     
     numVerticalTabs, verticalTabWidth = calculateTabLength( wantedTabLength, height )
     numVerticalEdges = calculateNumEdges( numVerticalTabs )
-    print( "Vertical tab width: ", verticalTabWidth )
-    print( "Num vertical edges: ", numVerticalEdges )
+    #print( "Vertical tab width: ", verticalTabWidth )
+    #print( "Num vertical edges: ", numVerticalEdges )
     
     
     # Top
@@ -152,17 +152,33 @@ def createLeftAndRightFingerJointsWall(component, plane, width, height, offset, 
     
     startPoint = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
     
+
+
+    wantedTabLength = 1
+    
+    numHorizontalTabs, horizontalTabWidth = calculateTabLength( wantedTabLength, width )
+    numHorizontalEdges = calculateNumEdges( numHorizontalTabs )
+    #print( "Horizontal tab width: ", horizontalTabWidth )
+    #print( "Num horizontal edges: ", numHorizontalEdges )
+    
+    numVerticalTabs, verticalTabWidth = calculateTabLength( wantedTabLength, height )
+    numVerticalEdges = calculateNumEdges( numVerticalTabs )
+    #print( "Vertical tab width: ", verticalTabWidth )
+    #print( "Num vertical edges: ", numVerticalEdges )
+    
+    
+    
     # Top
-    last = squarePattern( sketch, startPoint, 1.24, abs(thickness), 9, [RIGHT, DOWN, RIGHT, UP] )
+    last = squarePattern( sketch, startPoint, horizontalTabWidth, abs(thickness), numHorizontalEdges, [RIGHT, DOWN, RIGHT, UP] )
     
     # Right
-    last = squarePattern( sketch, last, abs(thickness), 1, 9, [DOWN, RIGHT, DOWN, LEFT] )
+    last = squarePattern( sketch, last, abs(thickness), verticalTabWidth, numVerticalEdges, [DOWN, RIGHT, DOWN, LEFT] )
     
     # Bottom
-    last = squarePattern( sketch, last, 1.24, abs(thickness), 9, [LEFT, UP, LEFT, DOWN] )
+    last = squarePattern( sketch, last, horizontalTabWidth, abs(thickness), numHorizontalEdges, [LEFT, UP, LEFT, DOWN] )
     
     # Left
-    squarePattern( sketch, last, abs(thickness), 1, 9, [UP, LEFT, UP, RIGHT] )
+    squarePattern( sketch, last, abs(thickness), verticalTabWidth, numVerticalEdges, [UP, LEFT, UP, RIGHT] )
     
     extrudeSketch( component, sketch, thickness, name )
 
@@ -176,17 +192,34 @@ def createTopAndBottomFingerJointsWall(component, plane, width, height, offset, 
     #startPoint = adsk.core.Point3D.create(center.x - (width/2) + thickness, center.y + (height/2) - thickness)
     startPoint = adsk.core.Point3D.create(center.x - (width/2), center.y + (height/2))
     
+    
+    
+    
+    wantedTabLength = 1
+    
+    numHorizontalTabs, horizontalTabWidth = calculateTabLength( wantedTabLength, width + (abs(thickness) * 2) )
+    numHorizontalEdges = calculateNumEdges( numHorizontalTabs )
+    print( "Horizontal tab width: ", horizontalTabWidth )
+    print( "Num horizontal edges: ", numHorizontalEdges )
+    
+    numVerticalTabs, verticalTabWidth = calculateTabLength( wantedTabLength, height )
+    numVerticalEdges = calculateNumEdges( numVerticalTabs )
+    print( "Vertical tab width: ", verticalTabWidth )
+    print( "Num vertical edges: ", numVerticalEdges )
+    
+    
+    
     # Top
-    last = squarePattern( sketch, startPoint, 1, abs(thickness), 17, [RIGHT, UP, RIGHT, DOWN], 0.6 )
+    last = squarePattern( sketch, startPoint, horizontalTabWidth, abs(thickness), numHorizontalEdges, [RIGHT, UP, RIGHT, DOWN], 0.6 )
     
     # Right
-    last = squarePattern( sketch, last, abs(thickness), 1.24, 9, [DOWN, RIGHT, DOWN, LEFT] )
+    last = squarePattern( sketch, last, abs(thickness), verticalTabWidth, numVerticalEdges, [DOWN, RIGHT, DOWN, LEFT] )
     
     # Bottom
-    last = squarePattern( sketch, last, 1, abs(thickness), 17, [LEFT, DOWN, LEFT, UP], 0.6 )
+    last = squarePattern( sketch, last, horizontalTabWidth, abs(thickness), numHorizontalEdges, [LEFT, DOWN, LEFT, UP], 0.6 )
     
     # Left
-    squarePattern( sketch, last, abs(thickness), 1.24, 9, [UP, LEFT, UP, RIGHT] )
+    squarePattern( sketch, last, abs(thickness), verticalTabWidth, numVerticalEdges, [UP, LEFT, UP, RIGHT] )
     
     extrudeSketch( component, sketch, thickness, name )
 
