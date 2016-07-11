@@ -1,9 +1,9 @@
 {
 	"autodeskProduct":	"Fusion360",
 	"type":	"script",
-	"author":	"",
+	"author":	"Mathias Bjerke",
 	"description":	{
-		"":	""
+		"":	"Script to create laser cut boxes"
 	},
 	"supportedOS":	"windows|mac",
 	"editEnabled":	true
