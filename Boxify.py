@@ -18,6 +18,7 @@ if app:
 
 
 
+
 def roundToNearestEOdd( n ):
 	r = round( n )
 	ceil = math.ceil( n )
@@ -255,22 +256,50 @@ def squarePattern(sketch, startPoint, width, height, number, pattern, firstAndLa
 
 
 
-class BoltCommandExecuteHandler(adsk.core.CommandEventHandler):
+class BoxCommandExecuteHandler(adsk.core.CommandEventHandler):
     def __init__(self):
         super().__init__()
     
     def notify(self, args):
         try:
+            boxName = 'Box'
+            boxWidth = 0
+            boxHeight = 0
+            boxDepth = 0
+            materialThickness = 0
+            tabWidth = 0
+
             unitsMgr = app.activeProduct.unitsManager
             command = args.firingEvent.sender
             inputs = command.commandInputs
 
             for input in inputs:
-                if input.id == 'boltName':
+                if input.id == 'boxName':
                     print(input.value)
-                elif input.id == 'headDiameter':
-                    print(unitsMgr.evaluateExpression(input.expression, "cm"))
+                    boxName = input.value
+                    
+                elif input.id == 'boxWidth':
+                    print(unitsMgr.evaluateExpression(input.expression, "mm"))
+                    boxWidth = unitsMgr.evaluateExpression(input.expression, "mm")
+                    
+                elif input.id == 'boxHeight':
+                    print(unitsMgr.evaluateExpression(input.expression, "mm"))
+                    boxHeight = unitsMgr.evaluateExpression(input.expression, "mm")
+                    
+                elif input.id == 'boxDepth':
+                    print(unitsMgr.evaluateExpression(input.expression, "mm"))
+                    boxDepth = unitsMgr.evaluateExpression(input.expression, "mm")
+                    
+                elif input.id == 'materialThickness':
+                    print(unitsMgr.evaluateExpression(input.expression, "mm"))
+                    materialThickness = unitsMgr.evaluateExpression(input.expression, "mm")
+                    
+                elif input.id == 'tabWidth':
+                    print(unitsMgr.evaluateExpression(input.expression, "mm"))
+                    tabWidth = unitsMgr.evaluateExpression(input.expression, "mm")
 
+            createTabbedBox(boxName, boxWidth, boxHeight, boxDepth, materialThickness, tabWidth)
+            
             args.isValidResult = True
 
         except:
@@ -278,7 +307,7 @@ class BoltCommandExecuteHandler(adsk.core.CommandEventHandler):
                 ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
 
-class BoltCommandDestroyHandler(adsk.core.CommandEventHandler):
+class BoxCommandDestroyHandler(adsk.core.CommandEventHandler):
     def __init__(self):
         super().__init__()
     
@@ -290,34 +319,59 @@ class BoltCommandDestroyHandler(adsk.core.CommandEventHandler):
                 ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
 
 
-class BoltCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):    
+class BoxCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):    
     def __init__(self):
-        super().__init__()        
+        super().__init__()
+        
     def notify(self, args):
         try:
             cmd = args.command
-            cmd.isRepeatable = False
-            onExecute = BoltCommandExecuteHandler()
+            cmd.isRepeatable = True
+            onExecute = BoxCommandExecuteHandler()
             cmd.execute.add(onExecute)
-            onExecutePreview = BoltCommandExecuteHandler()
-            cmd.executePreview.add(onExecutePreview)
-            onDestroy = BoltCommandDestroyHandler()
+            #onExecutePreview = BoxCommandExecuteHandler()
+            #cmd.executePreview.add(onExecutePreview)
+            onDestroy = BoxCommandDestroyHandler()
             cmd.destroy.add(onDestroy)
             # keep the handler referenced beyond this function
             handlers.append(onExecute)
-            handlers.append(onExecutePreview)
+            #handlers.append(onExecutePreview)
             handlers.append(onDestroy)
 
             #define the inputs
             inputs = cmd.commandInputs
-            inputs.addStringValueInput('boltName', 'Blot Name', "defaultBoltName")
-
-            initHeadDiameter = adsk.core.ValueInput.createByReal(3)
-            inputs.addValueInput('headDiameter', 'Head Diameter','cm',initHeadDiameter)
+            inputs.addStringValueInput('boxName', 'Box Name', "Box")
+            inputs.addValueInput('boxWidth', 'Box width', 'mm', adsk.core.ValueInput.createByReal(10) )
+            inputs.addValueInput('boxHeight', 'Box height', 'mm', adsk.core.ValueInput.createByReal(5) )
+            inputs.addValueInput('boxDepth', 'Box depth', 'mm', adsk.core.ValueInput.createByReal(5) )
+            inputs.addValueInput('materialThickness', 'Material thickness', 'mm', adsk.core.ValueInput.createByReal(0.4) )
+            inputs.addValueInput('tabWidth', 'Tab width', 'mm', adsk.core.ValueInput.createByReal(1) )
 
         except:
             if ui:
                 ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+
+
+def createTabbedBox(boxName, boxWidth, boxHeight, boxDepth, wallThickness, wantedTabLength):
+    newComp = createComponent( boxName )
+    xyPlane = newComp.xYConstructionPlane
+    yzPlane = newComp.yZConstructionPlane
+    xzPlane = newComp.xZConstructionPlane
+    
+    # width = 9 (9 tabs), height = 5 (5 tabs)
+    createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, (boxDepth/2)-wallThickness, wallThickness, wantedTabLength, "Front wall")
+    createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2)+wallThickness, -wallThickness, wantedTabLength, "Back wall")
+    
+    # width = 6.2 (5 tabs), height = 5 (5 tabs)
+    createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, (boxWidth/2)-wallThickness, wallThickness, wantedTabLength, "Right wall")
+    createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, -(boxWidth/2)+wallThickness, -wallThickness, wantedTabLength, "Left wall")
+    
+    # width = 8.2 (9 tabs), height = 6.2 (5 tabs)
+    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), (boxHeight/2)-wallThickness, wallThickness, wantedTabLength, "Top wall")   
+    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), -(boxHeight/2)+wallThickness, -wallThickness, wantedTabLength, "Bottom wall")    
+    
+    
 
 
 
@@ -374,9 +428,9 @@ def run(context):
         #check the command exists or not
         cmdDef = commandDefinitions.itemById('Boxify')
         if not cmdDef:
-            cmdDef = commandDefinitions.addButtonDefinition('Boxify', 'Create Bolt', 'Create a bolt.', './resources')
+            cmdDef = commandDefinitions.addButtonDefinition('Boxify', 'Create Box', 'Create a box.', './resources')
         
-        onCommandCreated = BoltCommandCreatedHandler()
+        onCommandCreated = BoxCommandCreatedHandler()
         cmdDef.commandCreated.add(onCommandCreated)
         # keep the handler referenced beyond this function
         handlers.append(onCommandCreated)
