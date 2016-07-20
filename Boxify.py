@@ -1,13 +1,21 @@
 #Author-
 #Description-
 
-import adsk.core, adsk.fusion, adsk.cam, math
+import adsk.core, adsk.fusion, adsk.cam, math, traceback
 
 
 UP = 1
 DOWN = 2
 RIGHT = 3
 LEFT = 4
+
+
+
+handlers = []
+app = adsk.core.Application.get()
+if app:
+    ui = app.userInterface
+
 
 
 def roundToNearestEOdd( n ):
@@ -241,35 +249,110 @@ def squarePattern(sketch, startPoint, width, height, number, pattern, firstAndLa
     return last
 
 
+
+
+
+
+
+
+class BoltCommandExecuteHandler(adsk.core.CommandEventHandler):
+    def __init__(self):
+        super().__init__()
+    
+    def notify(self, args):
+        try:
+            unitsMgr = app.activeProduct.unitsManager
+            command = args.firingEvent.sender
+            inputs = command.commandInputs
+
+            for input in inputs:
+                if input.id == 'boltName':
+                    print(input.value)
+                elif input.id == 'headDiameter':
+                    print(unitsMgr.evaluateExpression(input.expression, "cm"))
+
+            args.isValidResult = True
+
+        except:
+            if ui:
+                ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+
+class BoltCommandDestroyHandler(adsk.core.CommandEventHandler):
+    def __init__(self):
+        super().__init__()
+    
+    def notify(self, args):
+        try:
+            adsk.terminate()
+        except:
+            if ui:
+                ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+
+class BoltCommandCreatedHandler(adsk.core.CommandCreatedEventHandler):    
+    def __init__(self):
+        super().__init__()        
+    def notify(self, args):
+        try:
+            cmd = args.command
+            cmd.isRepeatable = False
+            onExecute = BoltCommandExecuteHandler()
+            cmd.execute.add(onExecute)
+            onExecutePreview = BoltCommandExecuteHandler()
+            cmd.executePreview.add(onExecutePreview)
+            onDestroy = BoltCommandDestroyHandler()
+            cmd.destroy.add(onDestroy)
+            # keep the handler referenced beyond this function
+            handlers.append(onExecute)
+            handlers.append(onExecutePreview)
+            handlers.append(onDestroy)
+
+            #define the inputs
+            inputs = cmd.commandInputs
+            inputs.addStringValueInput('boltName', 'Blot Name', "defaultBoltName")
+
+            initHeadDiameter = adsk.core.ValueInput.createByReal(3)
+            inputs.addValueInput('headDiameter', 'Head Diameter','cm',initHeadDiameter)
+
+        except:
+            if ui:
+                ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
+
+
+
 def run(context):
-    boxWidth = 10
-    boxHeight = 5
-    boxDepth = 7
+#    boxWidth = 15
+#    boxHeight = 8
+#    boxDepth = 8
+#    
+#    wantedTabLength = 1
+#    wallThickness = 0.4
+#    
+#    
+#    deleteAllComponents()
+#    
+#    
+#    newComp = createComponent( "Box" )
+#    xyPlane = newComp.xYConstructionPlane
+#    yzPlane = newComp.yZConstructionPlane
+#    xzPlane = newComp.xZConstructionPlane
+#    
+#    
+#    # width = 9 (9 tabs), height = 5 (5 tabs)
+#    createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, (boxDepth/2)-wallThickness, wallThickness, wantedTabLength, "Front wall")
+#    createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2)+wallThickness, -wallThickness, wantedTabLength, "Back wall")
+#    
+#    # width = 6.2 (5 tabs), height = 5 (5 tabs)
+#    createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, (boxWidth/2)-wallThickness, wallThickness, wantedTabLength, "Right wall")
+#    createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, -(boxWidth/2)+wallThickness, -wallThickness, wantedTabLength, "Left wall")
+#    
+#    # width = 8.2 (9 tabs), height = 6.2 (5 tabs)
+#    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), (boxHeight/2)-wallThickness, wallThickness, wantedTabLength, "Top wall")   
+#    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), -(boxHeight/2)+wallThickness, -wallThickness, wantedTabLength, "Bottom wall")    
+#    
+#    
     
-    wantedTabLength = 1
-    wallThickness = 0.4
-    
-    
-    deleteAllComponents()
-    
-    
-    newComp = createComponent( "Box" )
-    xyPlane = newComp.xYConstructionPlane
-    yzPlane = newComp.yZConstructionPlane
-    xzPlane = newComp.xZConstructionPlane
-    
-    
-    # width = 9 (9 tabs), height = 5 (5 tabs)
-    createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, (boxDepth/2)-wallThickness, wallThickness, wantedTabLength, "Front wall")
-    createFrontAndBackFingerJointsWall(newComp, xyPlane, boxWidth, boxHeight, -(boxDepth/2)+wallThickness, -wallThickness, wantedTabLength, "Back wall")
-    
-    # width = 6.2 (5 tabs), height = 5 (5 tabs)
-    createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, (boxWidth/2)-wallThickness, wallThickness, wantedTabLength, "Right wall")
-    createLeftAndRightFingerJointsWall(newComp, yzPlane, boxDepth-(wallThickness*2), boxHeight, -(boxWidth/2)+wallThickness, -wallThickness, wantedTabLength, "Left wall")
-    
-    # width = 8.2 (9 tabs), height = 6.2 (5 tabs)
-    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), (boxHeight/2)-wallThickness, wallThickness, wantedTabLength, "Top wall")   
-    createTopAndBottomFingerJointsWall(newComp, xzPlane, boxWidth-(wallThickness*2), boxDepth-(wallThickness*2), -(boxHeight/2)+wallThickness, -wallThickness, wantedTabLength, "Bottom wall")    
     
     
     
@@ -286,6 +369,25 @@ def run(context):
     
     
     
+    try:
+        commandDefinitions = ui.commandDefinitions
+        #check the command exists or not
+        cmdDef = commandDefinitions.itemById('Boxify')
+        if not cmdDef:
+            cmdDef = commandDefinitions.addButtonDefinition('Boxify', 'Create Bolt', 'Create a bolt.', './resources')
+        
+        onCommandCreated = BoltCommandCreatedHandler()
+        cmdDef.commandCreated.add(onCommandCreated)
+        # keep the handler referenced beyond this function
+        handlers.append(onCommandCreated)
+        inputs = adsk.core.NamedValues.create()
+        cmdDef.execute(inputs)
+    
+        # prevent this module from being terminate when the script returns, because we are waiting for event handlers to fire
+        adsk.autoTerminate(False)
+    except:
+        if ui:
+            ui.messageBox('Failed:\n{}'.format(traceback.format_exc()))
     
     
     
